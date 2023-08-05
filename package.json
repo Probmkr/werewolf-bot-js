@@ -1,0 +1,23 @@
+{
+  "name": "warewolf",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "test": "ts-node src/bot.ts",
+    "start": "node build/bot.js",
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "@types/node": "^20.4.7",
+    "discord.js": "^14.12.1",
+    "dotenv": "^16.3.1",
+    "ts-node": "^10.9.1",
+    "tsc": "^2.0.4",
+    "typescript": "^5.1.6"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0"
+  }
+}
