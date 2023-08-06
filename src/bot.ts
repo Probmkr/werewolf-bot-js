@@ -4,24 +4,27 @@ import {
   Collection,
   Events,
   SlashCommandBuilder,
+  CommandInteraction,
 } from "discord.js";
 import dotenv from "dotenv";
-import { readdirSync } from "fs";
-import path from "path";
+import { readdirSync } from "node:fs";
+import path from "node:path";
 
 dotenv.config();
 
 const prefix = "wf!";
 
-class CommandClient extends Client {
-  public commands: Collection<string, SlashCommandBuilder>;
-}
-
-const client = new CommandClient({
+const client = new Client({
   intents: ["Guilds", "GuildMembers", "GuildMessages"],
 });
 
-client.commands = new Collection<string, SlashCommandBuilder>();
+const commands = new Collection<
+  string,
+  {
+    data: Object;
+    execute: (interaction: CommandInteraction) => Promise<void>;
+  }
+>();
 
 client.once("ready", () => {
   console.log("Ready!");
@@ -38,7 +41,7 @@ for (const file of commandFiles) {
   // const command = require(filePath);
   import(filePath).then((command) => {
     if ("data" in command && "execute" in command) {
-      client.commands.set(command.data.name, command);
+      commands.set(command.data.name, command);
     } else {
       console.log(
         `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
@@ -58,10 +61,12 @@ client.on(Events.MessageCreate, async (message: Message) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+  console.log(interaction.isCommand());
+  if (!interaction.isCommand()) return;
 
   // @ts-ignore
-  const command = interaction.client.commands.get(interaction.commandName);
+  const command = commands.get(interaction.commandName);
+  console.log(command);
 
   if (!command) {
     console.error(`No command matching ${interaction.commandName} was found.`);

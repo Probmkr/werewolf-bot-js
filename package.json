@@ -5,7 +5,8 @@
   "scripts": {
     "test": "ts-node src/bot.ts",
     "start": "node build/bot.js",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "command": "ts-node src/command_register.ts"
   },
   "dependencies": {
     "@types/node": "^20.4.7",
