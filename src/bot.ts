@@ -1,4 +1,10 @@
-import { Message, Client, Collection, Events } from "discord.js";
+import {
+  Message,
+  Client,
+  Collection,
+  Events,
+  SlashCommandBuilder,
+} from "discord.js";
 import dotenv from "dotenv";
 import { readdirSync } from "fs";
 import path from "path";
@@ -8,14 +14,14 @@ dotenv.config();
 const prefix = "wf!";
 
 class CommandClient extends Client {
-  public commands: Collection<unknown, unknown>;
+  public commands: Collection<string, SlashCommandBuilder>;
 }
 
 const client = new CommandClient({
   intents: ["Guilds", "GuildMembers", "GuildMessages"],
 });
 
-client.commands = new Collection();
+client.commands = new Collection<string, SlashCommandBuilder>();
 
 client.once("ready", () => {
   console.log("Ready!");
@@ -29,18 +35,19 @@ const commandFiles = readdirSync(commandsPath).filter((file) =>
 
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
-  const command = require(filePath);
-  // Set a new item in the Collection with the key as the command name and the value as the exported module
-  if ("data" in command && "execute" in command) {
-    client.commands.set(command.data.name, command);
-  } else {
-    console.log(
-      `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
-    );
-  }
+  // const command = require(filePath);
+  import(filePath).then((command) => {
+    if ("data" in command && "execute" in command) {
+      client.commands.set(command.data.name, command);
+    } else {
+      console.log(
+        `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+      );
+    }
+  });
 }
 
-client.on("messageCreate", async (message: Message) => {
+client.on(Events.MessageCreate, async (message: Message) => {
   if (message.author.bot) return;
   const msgContent = message.content;
   if (msgContent.startsWith(prefix)) {
